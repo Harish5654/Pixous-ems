@@ -1,0 +1,98 @@
+# Render Blueprint for the Pixous HR/EMS project.
+# Deploy with: Render Dashboard → New → Blueprint → connect this repo.
+# Full walkthrough (including the external MySQL database): DEPLOY_RENDER.md
+#
+# Free-tier note: MySQL is NOT provided by Render, so the database lives on a
+# free external provider (Aiven / Clever Cloud) and the backend connects to it
+# via the DB_* environment variables below. Redis is optional and off by default.
+
+services:
+  # ---------------------------------------------------------------------------
+  # Backend API — Spring Boot (Docker web service)
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: pixous-ems-backend
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore            # closest Render region to India (Asia/Kolkata)
+    healthCheckPath: /actuator/health
+    autoDeploy: true
+    envVars:
+      # --- Database (set these in the dashboard after creating your free MySQL) ---
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      # --- Security ---
+      - key: APP_JWT_SECRET       # auto-generated strong secret
+        generateValue: true
+      # Origins allowed to call the API (the web static site). Update if you
+      # rename the web service or add a custom domain.
+      - key: APP_CORS_ALLOWED_ORIGINS
+        value: https://pixous-ems-web.onrender.com
+      # --- Optional: Redis (leave unset to run without it) ---
+      # - key: REDIS_HOST
+      #   sync: false
+      # - key: REDIS_PORT
+      #   value: "6379"
+      # --- Optional: SMS / chatbot providers (set in dashboard if you use them) ---
+      - key: TWILIO_ENABLED
+        value: "false"
+      # - key: TWILIO_ACCOUNT_SID
+      #   sync: false
+      # - key: TWILIO_AUTH_TOKEN
+      #   sync: false
+
+  # ---------------------------------------------------------------------------
+  # Web frontend — React + Vite (static site)
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: pixous-ems-web
+    runtime: static
+    rootDir: web
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    autoDeploy: true
+    envVars:
+      # Backend base URL used by the SPA (axios baseURL + WebSocket). Update if
+      # you rename the backend service or attach a custom domain.
+      - key: VITE_API_URL
+        value: https://pixous-ems-backend.onrender.com
+    routes:
+      # SPA fallback: serve index.html for client-side routes.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # ---------------------------------------------------------------------------
+  # Analytics service — Python face-recognition / OCR (Docker)
+  # ---------------------------------------------------------------------------
+  # DISABLED on free tier: dlib + PyTorch + Tesseract need > 512 MB RAM and will
+  # OOM on a free instance. To deploy it, uncomment below and set plan to
+  # "standard" (or higher). It also needs the same DB_* env vars as the backend.
+  #
+  # - type: web
+  #   name: pixous-ems-analytics
+  #   runtime: docker
+  #   rootDir: analytics-service
+  #   dockerfilePath: ./Dockerfile
+  #   plan: standard
+  #   region: singapore
+  #   autoDeploy: true
+  #   envVars:
+  #     - key: DB_HOST
+  #       sync: false
+  #     - key: DB_USER
+  #       sync: false
+  #     - key: DB_PASSWORD
+  #       sync: false
+  #     - key: DB_NAME
+  #       sync: false

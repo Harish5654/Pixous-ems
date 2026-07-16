@@ -98,3 +98,21 @@ logging:
   level:
     com.pixous.hrportal: INFO
     org.springframework.security: WARN
+
+# Actuator: expose only a lightweight liveness health endpoint for platform
+# probes (Render/Docker). Redis and mail are optional at runtime, so their
+# health indicators are disabled — otherwise /actuator/health would report
+# DOWN whenever those optional services are unavailable and fail the deploy.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+  health:
+    redis:
+      enabled: false
+    mail:
+      enabled: false
