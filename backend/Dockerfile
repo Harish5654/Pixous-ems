@@ -20,11 +20,17 @@ WORKDIR /app
 
 # Run as a non-root user.
 RUN addgroup -S app && adduser -S app -G app
-USER app
 
 # The Spring Boot repackage produces exactly one *.jar (the *.jar.original
 # backup does not match this glob).
 COPY --from=build /app/target/*.jar app.jar
+
+# Create the writable storage dir (generated PDFs, QR codes, uploads) and give
+# the non-root user ownership of the working directory.
+# NOTE: on Render's free tier this disk is ephemeral — files are lost on
+# restart/redeploy. Attach a persistent disk (paid) or use S3 for durability.
+RUN mkdir -p /app/storage && chown -R app:app /app
+USER app
 
 # Render injects PORT (default 10000); fall back to 7060 for local runs.
 ENV PORT=7060
