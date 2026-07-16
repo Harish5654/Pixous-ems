@@ -1,0 +1,10 @@
+# Dev profile overrides. Activated by default (spring.profiles.active=dev).
+spring:
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+logging:
+  level:
+    com.pixous.hrportal: DEBUG
+    org.hibernate.SQL: DEBUG

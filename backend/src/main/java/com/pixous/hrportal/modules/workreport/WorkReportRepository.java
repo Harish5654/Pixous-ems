@@ -1,0 +1,12 @@
+package com.pixous.hrportal.modules.workreport;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface WorkReportRepository extends JpaRepository<WorkReport, Long> {
+
+    List<WorkReport> findByUserIdOrderByWorkDateDescIdDesc(Long userId);
+
+    List<WorkReport> findAllByOrderByWorkDateDescIdDesc();
+}

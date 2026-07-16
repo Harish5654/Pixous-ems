@@ -1,0 +1,30 @@
+# Local infrastructure for the HR Portal backend.
+# Starts MySQL 8.4 and Redis 7 with the defaults expected by
+# backend/src/main/resources/application.yml (db hr_portal, root/root).
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: hrportal-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: hr
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    container_name: hrportal-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+volumes:
+  mysql_data:

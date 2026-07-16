@@ -1,0 +1,22 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+
+# Node
+node_modules/
+dist/
+build/
+.expo/
+*.log
+.env
+.env.local
+
+# Java / Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Runtime storage (generated PDFs, QR codes, uploads)
+backend/storage/
