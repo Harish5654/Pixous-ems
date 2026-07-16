@@ -21,16 +21,20 @@ services:
     autoDeploy: true
     envVars:
       # --- Database (set these in the dashboard after creating your free MySQL) ---
-      - key: DB_HOST
-        sync: false
-      - key: DB_PORT
-        value: "3306"
-      - key: DB_NAME
+      # Full JDBC URL. For Clever Cloud DEV use (no createDatabaseIfNotExist,
+      # since the DB already exists and the user can't create databases):
+      #   jdbc:mysql://<HOST>:3306/<DB_NAME>?useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true
+      - key: DB_URL
         sync: false
       - key: DB_USER
         sync: false
       - key: DB_PASSWORD
         sync: false
+      # Clever Cloud DEV allows only 5 connections — keep the pool below that.
+      - key: DB_POOL_SIZE
+        value: "4"
+      - key: DB_POOL_MIN_IDLE
+        value: "1"
       # --- Security ---
       - key: APP_JWT_SECRET       # auto-generated strong secret
         generateValue: true

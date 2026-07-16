@@ -79,14 +79,31 @@ The backend needs your MySQL details. In Render → **pixous-ems-backend** →
 
 | Key           | Value                                  |
 |---------------|----------------------------------------|
-| `DB_HOST`     | your MySQL host                        |
-| `DB_PORT`     | your MySQL port (often `3306`)         |
-| `DB_NAME`     | your database name                     |
+| `DB_URL`      | full JDBC URL (see below)              |
 | `DB_USER`     | your MySQL user                        |
 | `DB_PASSWORD` | your MySQL password                    |
 
-`APP_JWT_SECRET` is generated automatically. Save — the backend redeploys and
-runs the Flyway migrations against your database.
+`DB_POOL_SIZE` (4) and `DB_POOL_MIN_IDLE` (1) are already set in the Blueprint to
+stay under Clever Cloud DEV's 5-connection cap. `APP_JWT_SECRET` is generated
+automatically.
+
+**Building `DB_URL`** — use your MySQL host and database name (Clever Cloud's DB
+name equals the random user string). Do **not** include `createDatabaseIfNotExist`
+— the database already exists and the DEV user cannot create databases:
+
+```
+jdbc:mysql://<HOST>:3306/<DB_NAME>?useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true
+```
+
+Example (Clever Cloud):
+```
+jdbc:mysql://bxxxxxxxxxxxx-mysql.services.clever-cloud.com:3306/bxxxxxxxxxxxx?useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true
+```
+
+Save — the backend redeploys and runs the Flyway migrations against your database.
+
+> If migrations fail with a **storage/size** error, the DEV plan's 10 MB cap was
+> exceeded — move to a larger free MySQL (e.g. Aiven, ~5 GB) and update `DB_URL`.
 
 ---
 

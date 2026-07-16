@@ -4,12 +4,16 @@ spring:
   profiles:
     active: dev
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:hr}?useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+    # DB_URL lets a deployment supply the whole JDBC URL (e.g. a managed MySQL
+    # where the database already exists and createDatabaseIfNotExist must be
+    # omitted). Otherwise the URL is assembled from DB_HOST/DB_PORT/DB_NAME.
+    url: ${DB_URL:jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:hr}?useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true}
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:root123}
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
+      # Keep at/below the provider's connection cap (Clever Cloud DEV allows 5).
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
       pool-name: HrPortalHikari
   jpa:
     hibernate:
